@@ -19,7 +19,7 @@ const EditEvent = () => {
     const fetchEvent = async () => {
       try {
         const response = await fetchWithAuth(
-          `https://bolicheck.onrender.com`,
+          `https://bolicheck.onrender.com/api/events/${id}/`,
           { method: "GET" }
         );
         if (!response.ok) {

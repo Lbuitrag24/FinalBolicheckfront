@@ -22,7 +22,7 @@ const SellingList = () => {
   const fetchSellings = async () => {
     setLoading(true);
     try {
-      const url = new URL("https://bolicheck.onrender.comender.com/api/staff/sales/");
+      const url = new URL("https://bolicheck.onrender.com/api/staff/sales/");
       if (estado) url.searchParams.append("estado", estado);
       if (fecha) url.searchParams.append("fecha", fecha);
       const response = await fetchWithAuth(url.toString(), { method: "GET" });
@@ -76,7 +76,7 @@ const SellingList = () => {
   const handleConfirm = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `https://bolicheck.onrender.comender.com/api/staff/sales/${id}/confirm/`,
+        `https://bolicheck.onrender.com/api/staff/sales/${id}/confirm/`,
         {
           method: "POST",
         }

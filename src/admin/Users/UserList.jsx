@@ -16,7 +16,7 @@ const UserList = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetchWithAuth(
-        "https://bolicheck.onrender.comender.com/api/users/",
+        "https://bolicheck.onrender.com/api/users/",
         {
           method: "GET",
         }

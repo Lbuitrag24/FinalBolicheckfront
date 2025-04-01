@@ -17,7 +17,7 @@ const PrizeList = () => {
     const fetchPrizes = async () => {
       try {
         const response = await fetchWithAuth(
-          "https://bolicheck.onrender.comender.com/api/prizes/",
+          "https://bolicheck.onrender.com/api/prizes/",
           {
             method: "GET",
           }

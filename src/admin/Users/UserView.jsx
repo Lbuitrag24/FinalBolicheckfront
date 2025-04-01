@@ -13,7 +13,7 @@ const UserView = () => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await fetch(`https://bolicheck.onrender.comender.com/admin/users/${id}`, {
+                const response = await fetch(`https://bolicheck.onrender.com/admin/users/${id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

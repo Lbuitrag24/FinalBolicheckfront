@@ -31,7 +31,7 @@ const NewPrize = () => {
     }
     try {
       const response = await fetchWithAuth(
-        "https://bolicheck.onrender.comender.com/api/prizes/",
+        "https://bolicheck.onrender.com/api/prizes/",
         {
           method: "POST",
           body: formData,

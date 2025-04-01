@@ -58,7 +58,7 @@ const NewProduct = () => {
     }
     try {
       const response = await fetchWithAuth(
-        "https://bolicheck.onrender.comender.com/api/products/",
+        "https://bolicheck.onrender.com/api/products/",
         {
           method: "POST",
           body: formData,

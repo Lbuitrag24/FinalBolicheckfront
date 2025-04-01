@@ -22,7 +22,7 @@ const EditPrize = () => {
   useEffect(() => {
     const fetchPrize = async () => {
       try {
-        const response = await fetchWithAuth(`https://bolicheck.onrender.comes/${id}/`, { method: "GET" });
+        const response = await fetchWithAuth(`https://bolicheck.onrender.https://bolicheck.onrender.com/${id}/`, { method: "GET" });
         if (!response.ok) {
           throw new Error("Error al obtener el premio.");
         }
@@ -51,7 +51,7 @@ const EditPrize = () => {
     }
 
     try {
-      const response = await fetchWithAuth(`https://bolicheck.onrender.comes/${id}/`, {
+      const response = await fetchWithAuth(`https://bolicheck.onrender.com/api/prizes/${id}/`, {
         method: "PATCH",
         body: formData,
       });

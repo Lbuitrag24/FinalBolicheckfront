@@ -82,7 +82,7 @@ const ClientProductList = () => {
     const fetchProducts = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/products/",
+          "https://bolicheck.onrender.comender.com/api/products/",
           {
             method: "GET",
           }
@@ -104,7 +104,7 @@ const ClientProductList = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/categories/",
+          "https://bolicheck.onrender.com/api/categories/",
           {
             method: "GET",
           }

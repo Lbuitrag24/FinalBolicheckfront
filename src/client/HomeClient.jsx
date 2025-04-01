@@ -8,7 +8,7 @@ const HomeClient = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/products/offered_products/",
+        "https://bolicheck.onrender.com/api/products/offered_products/",
         {
           method: "GET",
         }
@@ -63,7 +63,7 @@ const HomeClient = () => {
                     <div className="card-body d-flex flex-column justify-content-between">
                       <div className="d-flex flex-column mt-3">
                         <img
-                          src={`http://localhost:8080/media/${product.image}`}
+                          src={`https://bolicheck.onrender.com/media/${product.image}`}
                           alt={product.name}
                           className={`card-img-top product-image ${
                             !product.is_available || product.stock <= 0

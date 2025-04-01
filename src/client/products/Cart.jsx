@@ -119,7 +119,7 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/sales/",
+          "https://bolicheck.onrender.com/api/sales/",
           {
             method: "POST",
             headers: {
@@ -165,7 +165,7 @@ const Cart = () => {
       setLoading(true);
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/reserves/",
+          "https://bolicheck.onrender.com/api/reserves/",
           {
             method: "POST",
             headers: {
@@ -227,7 +227,7 @@ const Cart = () => {
     };
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/sales/redeem/",
+        "https://bolicheck.onrender.com/api/sales/redeem/",
         {
           method: "POST",
           headers: {
@@ -256,7 +256,7 @@ const Cart = () => {
   const fetchEvents = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/reserves/reservesauth/",
+        "https://bolicheck.onrender.com/api/reserves/reservesauth/",
         {
           method: "GET",
         }

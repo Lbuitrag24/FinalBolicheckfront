@@ -12,7 +12,7 @@ const fetchWithAuth = async (url, options = {}) => {
     const response = await fetch(url, fetchOptions);
 
     if (response.status === 401) {
-        const refreshResponse = await fetch('http://localhost:8080/api/token/refresh/', {
+        const refreshResponse = await fetch('https://bolicheck.onrender.com/api/token/refresh/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

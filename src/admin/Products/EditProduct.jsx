@@ -34,7 +34,7 @@ const EditProduct = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/categories/",
+          "https://bolicheck.onrender.com/api/categories/",
           { method: "GET" }
         );
         if (!response.ok) {
@@ -67,7 +67,7 @@ const EditProduct = () => {
     const fetchProduct = async () => {
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/products/${id}/`,
+          `https://bolicheck.onrender.com/api/products/${id}/`,
           { method: "GET" }
         );
         if (!response.ok) {
@@ -111,7 +111,7 @@ const EditProduct = () => {
     );
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/${id}/`,
+        `https://bolicheck.onrender.com/api/products/${id}/`,
         {
           method: "PATCH",
           body: formData,

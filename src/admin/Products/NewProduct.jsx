@@ -23,7 +23,7 @@ const NewProduct = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/categories/`,
+          `https://bolicheck.onrender.com/api/categories/`,
           {
             method: "GET",
           }
@@ -58,7 +58,7 @@ const NewProduct = () => {
     }
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/products/",
+        "https://bolicheck.onrender.comender.com/api/products/",
         {
           method: "POST",
           body: formData,

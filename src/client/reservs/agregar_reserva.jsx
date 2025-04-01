@@ -15,7 +15,7 @@ const Agregar = ({props}) => {
       setAvailableSlots("Cargando cupos...")
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/reserves/available_slots/?date_in=${encodeURIComponent(eventData.date_in)}&date_out=${encodeURIComponent(eventData.date_out)}`,
+          `https://bolicheck.onrender.com/api/reserves/available_slots/?date_in=${encodeURIComponent(eventData.date_in)}&date_out=${encodeURIComponent(eventData.date_out)}`,
           {
             method: "GET",
           }
@@ -40,7 +40,7 @@ const Agregar = ({props}) => {
       useEffect(() => {
         const fetchEventData = async () => {
           try {
-            const response = await fetchWithAuth("http://localhost:8080/api/events/", {
+            const response = await fetchWithAuth("https://bolicheck.onrender.com/api/events/", {
               method: "GET",
             });
             const data = await response.json();

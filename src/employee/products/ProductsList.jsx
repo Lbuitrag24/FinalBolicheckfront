@@ -14,7 +14,7 @@ const EmployeeProductList = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/products/",
+        "https://bolicheck.onrender.com/api/products/",
         {
           method: "GET",
         }
@@ -52,7 +52,7 @@ const EmployeeProductList = () => {
         } else {
           try {
             const response = await fetchWithAuth(
-              `http://localhost:8080/api/products/${product.id}/add/`,
+              `https://bolicheck.onrender.com/api/products/${product.id}/add/`,
               {
                 method: "POST",
                 body: JSON.stringify({ quantity: parseInt(quantity) }),

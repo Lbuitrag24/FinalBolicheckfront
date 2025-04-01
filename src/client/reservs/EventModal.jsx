@@ -40,7 +40,7 @@ const EventModal = ({ evento, onClose }) => {
                   <div className="d-flex justify-content-center align-items-center px-3 col-4">
                     <img
                       className="reserve-product-image"
-                      src={`http://localhost:8080/${producto?.product?.image}`}
+                      src={`https://bolicheck.onrender.com/${producto?.product?.image}`}
                       alt={producto?.product?.name}
                     />
                   </div>

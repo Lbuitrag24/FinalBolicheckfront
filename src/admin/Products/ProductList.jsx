@@ -23,7 +23,7 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/products/",
+        "https://bolicheck.onrender.com/api/products/",
         {
           method: "GET",
         }
@@ -63,7 +63,7 @@ const ProductList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/${id}/changestate/`,
+        `https://bolicheck.onrender.comender.com/api/products/${id}/changestate/`,
         {
           method: "POST",
         }
@@ -100,7 +100,7 @@ const ProductList = () => {
       } else {
         try {
           const response = await fetchWithAuth(
-            `http://localhost:8080/api/products/${product.id}/add/`,
+            `https://bolicheck.onrender.com/api/products/${product.id}/add/`,
             {
               method: "POST",
               body: JSON.stringify({ quantity: parseInt(quantity) }),
@@ -166,7 +166,7 @@ const ProductList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/${product.id}/offer/`,
+        `https://bolicheck.onrender.com/api/products/${product.id}/offer/`,
         {
           method: "POST",
           body: JSON.stringify({ offeredPrice: parseInt(parsedOfferedPrice) }),
@@ -200,7 +200,7 @@ const ProductList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/${product.id}/endoffer/`,
+        `https://bolicheck.onrender.com/api/products/${product.id}/endoffer/`,
         {
           method: "POST",
         }
@@ -249,7 +249,7 @@ const ProductList = () => {
     try {
       toast.info("Generando el reporte, danos un momento...");
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/inventory_report/`,
+        `https://bolicheck.onrender.com/api/products/inventory_report/`,
         {
           method: "POST",
         }
@@ -277,7 +277,7 @@ const ProductList = () => {
     try {
       toast.info("Generando el reporte, danos un momento...");
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/products/best_sellers_report/`,
+        `https://bolicheck.onrender.com/api/products/best_sellers_report/`,
         {
           method: "POST",
         }

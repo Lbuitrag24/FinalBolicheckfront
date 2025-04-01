@@ -19,7 +19,7 @@ const EditEvent = () => {
     const fetchEvent = async () => {
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/events/${id}/`,
+          `https://bolicheck.onrender.comender.comender.com/api/events/${id}/`,
           { method: "GET" }
         );
         if (!response.ok) {
@@ -44,7 +44,7 @@ const EditEvent = () => {
 
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/events/${id}/`,
+        `https://bolicheck.onrender.com/api/events/${id}/`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

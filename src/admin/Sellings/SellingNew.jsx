@@ -27,7 +27,7 @@ const SellingNew = () => {
   const fetchProductData = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/products/",
+        "https://bolicheck.onrender.com/api/products/",
         {
           method: "GET",
         }
@@ -57,7 +57,7 @@ const SellingNew = () => {
     const fetchUsers = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/staff/users/",
+          "https://bolicheck.onrender.com/api/staff/users/",
           {
             method: "GET",
           }
@@ -105,7 +105,7 @@ const SellingNew = () => {
     };
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/staff/sales/",
+        "https://bolicheck.onrender.com/api/staff/sales/",
         {
           method: "POST",
           headers: {

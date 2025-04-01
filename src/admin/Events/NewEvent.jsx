@@ -23,7 +23,7 @@ const NewEvent = () => {
     };
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/events/",
+        "https://bolicheck.onrender.comender.com/api/events/",
         {
           method: "POST",
           headers: {

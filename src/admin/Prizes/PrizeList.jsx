@@ -17,7 +17,7 @@ const PrizeList = () => {
     const fetchPrizes = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/prizes/",
+          "https://bolicheck.onrender.comender.com/api/prizes/",
           {
             method: "GET",
           }
@@ -54,7 +54,7 @@ const PrizeList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/prizes/${id}/changestate/`,
+        `https://bolicheck.onrender.com/api/prizes/${id}/changestate/`,
         {
           method: "POST",
         }

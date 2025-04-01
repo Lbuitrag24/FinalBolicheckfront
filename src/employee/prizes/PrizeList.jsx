@@ -11,7 +11,7 @@ const EmployeePrizeList = () => {
     const fetchPrizes = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/prizes/",
+          "https://bolicheck.onrender.com/api/prizes/",
           {
             method: "GET",
           }

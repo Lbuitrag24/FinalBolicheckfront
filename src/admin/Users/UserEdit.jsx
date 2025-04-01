@@ -22,7 +22,7 @@ const EditUser = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetchWithAuth(`http://localhost:8080/api/users/${id}/`, { method: "GET" });
+        const response = await fetchWithAuth(`https://bolicheck.onrender.comender.com/api/users/${id}/`, { method: "GET" });
         if (!response.ok) throw new Error("Error al obtener el usuario.");
         const data = await response.json();
         setFirstName(data.first_name);
@@ -74,7 +74,7 @@ const EditUser = () => {
     const updatedUser = { first_name, last_name: lastName, username, email, telephone_number, is_staff: isStaff };
 
     try {
-      const response = await fetchWithAuth(`http://localhost:8080/api/users/${id}/`, {
+      const response = await fetchWithAuth(`https://bolicheck.onrender.com/api/users/${id}/`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),

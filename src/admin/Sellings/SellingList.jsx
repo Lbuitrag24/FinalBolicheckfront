@@ -22,7 +22,7 @@ const SellingList = () => {
   const fetchSellings = async () => {
     setLoading(true);
     try {
-      const url = new URL("http://localhost:8080/api/staff/sales/");
+      const url = new URL("https://bolicheck.onrender.comender.com/api/staff/sales/");
       if (estado) url.searchParams.append("estado", estado);
       if (fecha) url.searchParams.append("fecha", fecha);
       const response = await fetchWithAuth(url.toString(), { method: "GET" });
@@ -76,7 +76,7 @@ const SellingList = () => {
   const handleConfirm = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/staff/sales/${id}/confirm/`,
+        `https://bolicheck.onrender.comender.com/api/staff/sales/${id}/confirm/`,
         {
           method: "POST",
         }
@@ -103,7 +103,7 @@ const SellingList = () => {
   const handleCancel = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/staff/sales/${id}/cancel/`,
+        `https://bolicheck.onrender.com/api/staff/sales/${id}/cancel/`,
         {
           method: "POST",
         }
@@ -137,7 +137,7 @@ const SellingList = () => {
         toast.error("No hay un filtro de fecha seleccionado.");
       }
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/staff/sales/${url}`,
+        `https://bolicheck.onrender.com/api/staff/sales/${url}`,
         {
           method: "POST",
         }
@@ -407,7 +407,7 @@ const SellingList = () => {
                             <img
                               src={
                                 product?.product?.image ??
-                                "http://localhost:8080/media/products/default.webp"
+                                "https://bolicheck.onrender.com/media/products/default.webp"
                               }
                               className="col-12 col-lg-3 h-100 h-lg-auto"
                               style={{ objectFit: "cover" }}

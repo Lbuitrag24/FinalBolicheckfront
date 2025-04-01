@@ -16,7 +16,7 @@ const UserList = () => {
   const fetchUsers = async () => {
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/users/",
+        "https://bolicheck.onrender.comender.com/api/users/",
         {
           method: "GET",
         }
@@ -53,7 +53,7 @@ const UserList = () => {
   const handleDelete = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/users/${id}/changestate/`,
+        `https://bolicheck.onrender.com/api/users/${id}/changestate/`,
         {
           method: "POST",
         }
@@ -80,7 +80,7 @@ const UserList = () => {
     try {
       toast.info("Generando el reporte, danos un momento...");
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/users/employees_report/`,
+        `https://bolicheck.onrender.com/api/users/employees_report/`,
         {
           method: "POST",
         }
@@ -108,7 +108,7 @@ const UserList = () => {
     try {
       toast.info("Generando el reporte, danos un momento...");
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/users/clients_report/`,
+        `https://bolicheck.onrender.com/api/users/clients_report/`,
         {
           method: "POST",
         }

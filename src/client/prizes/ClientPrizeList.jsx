@@ -24,7 +24,7 @@ const ClientPrizeList = () => {
     const fetchUserPoints = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/users/points/",
+          "https://bolicheck.onrender.com/api/users/points/",
           {
             method: "GET",
           }
@@ -46,7 +46,7 @@ const ClientPrizeList = () => {
     const fetchPrizes = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/prizes/",
+          "https://bolicheck.onrender.com/api/prizes/",
           {
             method: "GET",
           }

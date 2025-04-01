@@ -18,7 +18,7 @@ const CategoryList = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/categories/",
+          "https://bolicheck.onrender.com/api/categories/",
           {
             method: "GET",
             headers: {
@@ -62,7 +62,7 @@ const CategoryList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/categories/${id}/changestate/`,
+        `https://bolicheck.onrender.com/api/categories/${id}/changestate/`,
         {
           method: "POST",
         }

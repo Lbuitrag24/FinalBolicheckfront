@@ -20,7 +20,7 @@ const Profile = () => {
       formData.append("photo", file);
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/users/updatephoto",
+          "https://bolicheck.onrender.com/api/users/updatephoto",
           {
             method: "POST",
             body: formData,

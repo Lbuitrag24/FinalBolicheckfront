@@ -33,7 +33,7 @@ const NewCategory = () => {
 
     try {
       const response = await fetchWithAuth(
-        "http://localhost:8080/api/categories/",
+        "https://bolicheck.onrender.comender.com/api/categories/",
         {
           method: "POST",
           body: formData,

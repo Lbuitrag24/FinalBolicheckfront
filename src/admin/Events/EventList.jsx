@@ -18,7 +18,7 @@ const EventList = () => {
     const fetchEvents = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/events/",
+          "https://bolicheck.onrender.comender.com/api/events/",
           {
             method: "GET",
           }
@@ -67,7 +67,7 @@ const EventList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/events/${id}/changestate/`,
+        `https://bolicheck.onrender.com/api/events/${id}/changestate/`,
         {
           method: "POST",
         }

@@ -12,7 +12,7 @@ export const ClientSellingList = () => {
   const fetchSellings = async () => {
     setLoading(true);
     try {
-      const response = await fetchWithAuth("http://localhost:8080/api/sales/", {
+      const response = await fetchWithAuth("https://bolicheck.onrender.com/api/sales/", {
         method: "GET",
       });
       if (response.ok) {
@@ -32,7 +32,7 @@ export const ClientSellingList = () => {
   const handleCancel = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/sales/${id}/cancel/`,
+        `https://bolicheck.onrender.com/api/sales/${id}/cancel/`,
         {
           method: "POST",
         }

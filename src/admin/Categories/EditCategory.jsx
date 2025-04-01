@@ -38,7 +38,7 @@ const EditCategory = () => {
     const fetchCategory = async () => {
       try {
         const response = await fetchWithAuth(
-          `http://localhost:8080/api/categories/${id}/`,
+          `https://bolicheck.onrender.com/api/categories/${id}/`,
           { method: "GET" }
         );
         if (!response.ok) {
@@ -67,7 +67,7 @@ const EditCategory = () => {
     formData.append("is_available", is_available ? "True" : "False");
     try {
       const response = await fetchWithAuth(
-        `http://localhost:8080/api/categories/${id}/`,
+        `https://bolicheck.onrender.com/api/categories/${id}/`,
         {
           method: "PATCH",
           body: formData,

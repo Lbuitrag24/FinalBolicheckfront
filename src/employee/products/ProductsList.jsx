@@ -6,6 +6,9 @@ import useInputToast from "../../hooks/inputToast";
 import useConfirmToast from "../../hooks/confirmToast";
 import { motion } from "framer-motion";
 const EmployeeProductList = () => {
+  useEffect(() => {
+      document.title = "Productos | Bolicheck";
+    }, []);
   const inputToast = useInputToast();
   const confirmToast = useConfirmToast();
   const [products, setProducts] = useState([]);

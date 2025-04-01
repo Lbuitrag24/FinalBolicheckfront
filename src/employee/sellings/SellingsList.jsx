@@ -6,6 +6,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
 const EmployeeSellingList = () => {
+  useEffect(() => {
+      document.title = "Ventas | Bolicheck";
+    }, []);
   const [sellings, setSellings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);

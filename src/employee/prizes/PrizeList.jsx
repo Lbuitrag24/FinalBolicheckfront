@@ -4,6 +4,9 @@ import fetchWithAuth from "../../hooks/fetchwithauth";
 import { motion } from "framer-motion";
 
 const EmployeePrizeList = () => {
+  useEffect(() => {
+      document.title = "Premios | Bolicheck";
+    }, []);
   const [prizes, setPrizes] = useState([]);
   const [loading, setLoading] = useState(true);
 

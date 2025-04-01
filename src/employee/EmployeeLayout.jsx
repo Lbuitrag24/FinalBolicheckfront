@@ -131,45 +131,39 @@ const EmployeeLayout = ({ children }) => {
       <main className="d-flex flex-column flex-grow-1 w-100 p-3 p-lg-4">
         {children}
       </main>
-      <footer className="pie_pagina col-12">
-        <div className="grupo_1">
-          <div className="box">
+      <footer className="d-flex flex-column pie_pagina col-12">
+        <div className="grupo_1 d-flex flex-column flex-md-row text-center text-md-start align-items-center justify-content-md-center">
+          <div className="box mb-3 mb-md-0">
             <figure>
               <a href="#">
-                <img src="/rana.png" alt="logo" />
+                <img src="/rana.png" alt="logo" className="img-fluid" />
               </a>
             </figure>
           </div>
-          <div className="box">
-            <h2>SOBRE NOSOTROS</h2>
-            <p>
+          <div className="box mb-3 mb-md-0 col-10 col-md-4">
+            <h2 className="fs-5 fw-bold">SOBRE NOSOTROS</h2>
+            <h6 className="col-12">
               Nosotros somos PlayHouse, nuestro objetivo principal es brindar un
               servicio al cliente excepcional y ofrecer servicios de bolirana,
               bar, coctelería y aperitivos.
-            </p>
+            </h6>
           </div>
           <div className="box">
-            <h2>SÍGUENOS</h2>
-            <div className="red_social">
+            <h2 className="fs-5 fw-bold">SÍGUENOS</h2>
+            <div className="red_social d-flex justify-content-center gap-3">
               <a href="#">
-                <i
-                  className="bx bxl-facebook-square"
-                  style={{ fontSize: "2rem" }}
-                ></i>
+                <i className="bx bxl-facebook-square fs-3"></i>
               </a>
               <a href="#">
-                <i
-                  className="bx bxl-instagram"
-                  style={{ fontSize: "2rem" }}
-                ></i>
+                <i className="bx bxl-instagram fs-3"></i>
               </a>
               <a href="#">
-                <i className="bx bxl-youtube" style={{ fontSize: "2rem" }}></i>
+                <i className="bx bxl-youtube fs-3"></i>
               </a>
             </div>
           </div>
         </div>
-        <div className="grupo_2">
+        <div className="grupo_2 text-center mt-3">
           <small>
             &copy; 2024 <b>Play house</b> - Todos Los Derechos Reservados
           </small>

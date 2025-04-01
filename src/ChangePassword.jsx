@@ -22,7 +22,7 @@ const ChangePassword = () => {
     } else {
       try {
         const response = await fetch(
-          `http://https://bolicheck.onrender.com/api/password_reset_confirm/${uid}/${token}`,
+          `https://bolicheck.onrender.com/api/password_reset_confirm/${uid}/${token}`,
           {
             method: "POST",
             headers: {

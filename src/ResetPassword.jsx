@@ -13,7 +13,7 @@ const ResetPassword = () => {
     e.preventDefault();
     try {
       setBlocked(true);
-      const response = await fetch("http://https://bolicheck.onrender.com:8080/api/password_reset", {
+      const response = await fetch("http://https://bolicheck.onrender.com/api/password_reset", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

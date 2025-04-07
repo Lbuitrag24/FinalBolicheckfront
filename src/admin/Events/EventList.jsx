@@ -19,7 +19,7 @@ const EventList = () => {
     const fetchEvents = async () => {
       try {
         const response = await fetchWithAuth(
-          "http://localhost:8080/api/events/",
+          "https://bolicheck.onrender.com/api/events/",
           {
             method: "GET",
           }

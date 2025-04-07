@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { MoonLoader } from "react-spinners";
+import ReactPaginate from "react-paginate";
 
 const SellingList = () => {
   useEffect(() => {
@@ -18,7 +20,18 @@ const SellingList = () => {
   const [fecha, setFecha] = useState("hoy");
   const [url, setUrl] = useState("daily_report/");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filteredSellings, setFilteredSellings] = useState([]);
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * ITEMS_PER_PAGE;
+  const currentItems = filteredSellings.slice(offset, offset + ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(filteredSellings.length / ITEMS_PER_PAGE);
+  const startIndex = filteredSellings.length === 0 ? 0 : offset + 1;
+  const endIndex = offset + currentItems.length;
 
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
   const fetchSellings = async () => {
     setLoading(true);
     try {
@@ -43,20 +56,24 @@ const SellingList = () => {
     }
   };
 
-  const filteredSellings = sellings.filter((selling) => {
-    const formattedDate = new Date(selling.date).toLocaleString("es-MX", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return (
-      String(selling.id).includes(searchTerm) ||
-      formattedDate.includes(searchTerm) ||
-      selling?.by?.username?.includes(searchTerm)
+  useEffect(() => {
+    setFilteredSellings(
+      sellings.filter((selling) => {
+        const formattedDate = new Date(selling.date).toLocaleString("es-MX", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        return (
+          String(selling.id).includes(searchTerm) ||
+          formattedDate.includes(searchTerm) ||
+          selling?.by?.username?.includes(searchTerm)
+        );
+      })
     );
-  });
+  }, [searchTerm, sellings]);
 
   useEffect(() => {
     fecha == "hoy"
@@ -173,9 +190,10 @@ const SellingList = () => {
       <div className="col-12 col-lg-10 mx-auto h-auto rounded-4 form-style">
         <div className="d-flex justify-content-between">
           <button
-            disabled={loadingReport}
+            className={`btn secondary-btn-style col-3 h-25 mt-4 mx-auto text-truncate ${
+              loading || loadingReport ? "disabled2" : ""
+            }`}
             onClick={handleReport}
-            className="btn secondary-btn-style col-3 h-25 mt-4 mx-auto text-truncate"
           >
             {loadingReport
               ? "Generando..."
@@ -245,9 +263,11 @@ const SellingList = () => {
         </div>
         <ul className="list-group mt-4 col-11 mx-auto mb-3 py-3">
           {loading ? (
-            <h6 className="text-center">Cargando...</h6>
-          ) : filteredSellings.length > 0 ? (
-            filteredSellings.map((selling) => (
+            <div className="client-loader">
+              <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
+            </div>
+          ) : currentItems.length > 0 ? (
+            currentItems.map((selling) => (
               <li
                 key={selling.id}
                 className="list-group-item d-flex flex-column mb-2 sellings-card-style"
@@ -398,123 +418,150 @@ const SellingList = () => {
                       </strong>
                     </p>
                     <div className="d-flex flex-column gap-3">
-                    {!selling.is_redemption
-                      ? selling.products.map((product, i) => (
-                        <div
-                          className="card col-12 col-md-10 mx-auto subsellings-card-style align-items-between gap-3 flex-lg-row p-3 mb-2"
-                          key={i}
-                        >
-                            <img
-                              src={
-                                product?.product?.image ??
-                                "https://bolicheck.onrender.com/media/products/default.webp"
-                              }
-                              className="col-12 col-lg-3 h-100 h-lg-auto"
-                              style={{ objectFit: "cover" }}
-                              alt="Imagen del producto"
-                            />
-                            <div className="col-12 my-auto col-lg-5">
-                            <h4 className="text-center text-truncate">
-                                {product?.product?.name}
-                              </h4>
-                              <h5 className="text-center">
-                              {product.is_offer == true ? <><del>${product.product.price}</del> <span className="text-success">${product.unit_price == 0 ? "Gratis" : product.unit_price}</span></> : `$${product.product.price}`}
-                            </h5>
-                              <h6
-                                className="text-center w-50 mx-auto rounded-5"
-                                style={{ backgroundColor: "gray" }}
-                              >
-                                {product?.product?.category?.name ?? "N/A"}
-                              </h6>
-                              <p className="text-center mb-0">
-                                <i>
-                                  {product?.product?.points ?? "N/A"} pts. C/U
-                                </i>
-                              </p>
-                              <p
-                              className="text-center text-truncate"
-                              style={{ color: "gray" }}
+                      {!selling.is_redemption
+                        ? selling.products.map((product, i) => (
+                            <div
+                              className="card col-12 col-md-10 mx-auto subsellings-card-style align-items-between gap-3 flex-lg-row p-3 mb-2"
+                              key={i}
                             >
-                              {product.product.description}
-                            </p>
+                              <img
+                                src={
+                                  product?.product?.image ??
+                                  "https://bolicheck.onrender.com/media/products/default.webp"
+                                }
+                                className="col-12 col-lg-3 h-100 h-lg-auto"
+                                style={{ objectFit: "cover" }}
+                                alt="Imagen del producto"
+                              />
+                              <div className="col-12 my-auto col-lg-5">
+                                <h4 className="text-center text-truncate">
+                                  {product?.product?.name}
+                                </h4>
+                                <h5 className="text-center">
+                                  {product.is_offer == true ? (
+                                    <>
+                                      <del>${product.product.price}</del>{" "}
+                                      <span className="text-success">
+                                        $
+                                        {product.unit_price == 0
+                                          ? "Gratis"
+                                          : product.unit_price}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    `$${product.product.price}`
+                                  )}
+                                </h5>
+                                <h6
+                                  className="text-center w-50 mx-auto rounded-5"
+                                  style={{ backgroundColor: "gray" }}
+                                >
+                                  {product?.product?.category?.name ?? "N/A"}
+                                </h6>
+                                <p className="text-center mb-0">
+                                  <i>
+                                    {product?.product?.points ?? "N/A"} pts. C/U
+                                  </i>
+                                </p>
+                                <p
+                                  className="text-center text-truncate"
+                                  style={{ color: "gray" }}
+                                >
+                                  {product.product.description}
+                                </p>
+                              </div>
+                              <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
+                                <h5
+                                  style={{ color: "gray" }}
+                                  className="text-center col-12 col-lg-6"
+                                >
+                                  {product.quantity} x ${product.unit_price}
+                                </h5>
+                                <h4 className="text-center col-12 col-lg-6">
+                                  ${product.subtotal}
+                                </h4>
+                              </div>
                             </div>
-                            <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                            <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                              {product.quantity} x ${product.unit_price}
-                            </h5>
-                            <h4 className="text-center col-12 col-lg-6">${product.subtotal}</h4>
-                          </div>
-                          </div>
-                        ))
-                      : selling.prizes.map((prize, i) => (
-                        <div
-                        className="card col-12 col-lg-10 mx-auto subsellings-card-style align-items-between gap-3 flex-lg-row p-3 mb-2"
-                        key={i}
-                      >
-                            <img
-                              src={prize.prize.image}
-                              className="col-12 col-lg-2"
-                              style={{ objectFit: "cover" }}
-                            />
-                            <div className="col-12 my-auto col-lg-5">
-                          <h4 className="text-center text-truncate">{prize.prize.name}</h4>
-                          <h5 className="text-center">{prize.prize.required_points} pts. C/U</h5>
-                          <p
-                            className="text-center text-truncate"
-                            style={{ color: "gray" }}
-                          >
-                            {prize.prize.description}
+                          ))
+                        : selling.prizes.map((prize, i) => (
+                            <div
+                              className="card col-12 col-lg-10 mx-auto subsellings-card-style align-items-between gap-3 flex-lg-row p-3 mb-2"
+                              key={i}
+                            >
+                              <img
+                                src={prize.prize.image}
+                                className="col-12 col-lg-2"
+                                style={{ objectFit: "cover" }}
+                              />
+                              <div className="col-12 my-auto col-lg-5">
+                                <h4 className="text-center text-truncate">
+                                  {prize.prize.name}
+                                </h4>
+                                <h5 className="text-center">
+                                  {prize.prize.required_points} pts. C/U
+                                </h5>
+                                <p
+                                  className="text-center text-truncate"
+                                  style={{ color: "gray" }}
+                                >
+                                  {prize.prize.description}
+                                </p>
+                              </div>
+                              <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
+                                <h5
+                                  style={{ color: "gray" }}
+                                  className="text-center col-12 col-lg-6"
+                                >
+                                  {prize.quantity} x{" "}
+                                  {prize.prize.required_points}pts.
+                                </h5>
+                                <h4 className="text-center col-12 col-lg-6">
+                                  {prize.subtotal}pts.
+                                </h4>
+                              </div>
+                            </div>
+                          ))}
+                      {selling.reserve.length != 0 && (
+                        <div>
+                          <p>
+                            <strong>Detalles de la reserva:</strong>
                           </p>
+                          <ul>
+                            <li>
+                              <p>
+                                <strong>Evento: </strong>
+                                {selling.reserve[0].event_type.event_type}
+                              </p>
+                            </li>
+                            <li>
+                              <p>
+                                <strong>Asistentes: </strong>
+                                {selling.reserve[0].num_people}
+                              </p>
+                            </li>
+                            <li>
+                              <p>
+                                <strong>Fecha y hora de entrada: </strong>
+                                {format(
+                                  new Date(selling.reserve[0].date_in),
+                                  "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                  { locale: es }
+                                )}
+                              </p>
+                            </li>
+                            <li>
+                              <p>
+                                <strong>Fecha y hora de salida: </strong>
+                                {format(
+                                  new Date(selling.reserve[0].date_out),
+                                  "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                  { locale: es }
+                                )}
+                              </p>
+                            </li>
+                          </ul>
                         </div>
-                        <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                          <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                            {prize.quantity} x {prize.prize.required_points}pts.
-                          </h5>
-                          <h4 className="text-center col-12 col-lg-6">{prize.subtotal}pts.</h4>
-                        </div>
-                          </div>
-                        ))}
-                    {selling.reserve.length != 0 && (
-                      <div>
-                        <p>
-                          <strong>Detalles de la reserva:</strong>
-                        </p>
-                        <ul>
-                          <li>
-                            <p>
-                              <strong>Evento: </strong>
-                              {selling.reserve[0].event_type.event_type}
-                            </p>
-                          </li>
-                          <li>
-                            <p>
-                              <strong>Asistentes: </strong>
-                              {selling.reserve[0].num_people}
-                            </p>
-                          </li>
-                          <li>
-                            <p>
-                              <strong>Fecha y hora de entrada: </strong>
-                              {format(
-                                new Date(selling.reserve[0].date_in),
-                                "E'.' dd/MM/yyyy 'a las' HH:mm",
-                                { locale: es }
-                              )}
-                            </p>
-                          </li>
-                          <li>
-                            <p>
-                              <strong>Fecha y hora de salida: </strong>
-                              {format(
-                                new Date(selling.reserve[0].date_out),
-                                "E'.' dd/MM/yyyy 'a las' HH:mm",
-                                { locale: es }
-                              )}
-                            </p>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                      )}
                     </div>
                   </div>
                 )}
@@ -532,6 +579,27 @@ const SellingList = () => {
             </div>
           )}
         </ul>
+        <p className="text-center">
+          Mostrando {startIndex}–{endIndex} de {filteredSellings.length}{" "}
+          resultado(s)
+        </p>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Siguiente >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          pageCount={pageCount}
+          previousLabel="< Anterior"
+          renderOnZeroPageCount={null}
+          containerClassName="pagination justify-content-center mt-4 custom-paginate"
+          pageClassName="page-item"
+          pageLinkClassName="page-link custom-page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link custom-page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link custom-page-link"
+          activeClassName="active custom-active"
+        />
       </div>
     </motion.div>
   );

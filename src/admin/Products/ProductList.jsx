@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import fetchWithAuth from "../../hooks/fetchwithauth";
+import ReactPaginate from "react-paginate";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 import useConfirmToast from "../../hooks/confirmToast";
+import useInformToast from "../../hooks/informToast";
 import useInputToast from "../../hooks/inputToast";
+import { MoonLoader } from "react-spinners";
 import { Link } from "react-router-dom";
 
 const ProductList = () => {
@@ -12,6 +15,7 @@ const ProductList = () => {
   }, []);
   const inputToast = useInputToast();
   const confirmToast = useConfirmToast();
+  const informToast = useInformToast();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -20,6 +24,17 @@ const ProductList = () => {
   const [waitingInput, setWaitingInput] = useState(false);
   const [loadingReport, setLoadingReport] = useState(false);
   const [open, setOpen] = useState(false);
+  const ITEMS_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * ITEMS_PER_PAGE;
+  const currentItems = products.slice(offset, offset + ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const startIndex = products.length === 0 ? 0 : offset + 1;
+  const endIndex = offset + currentItems.length;
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
   const fetchProducts = async () => {
     try {
       const response = await fetchWithAuth(
@@ -47,13 +62,24 @@ const ProductList = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
-  if (loading) {
-    return (
-      <div className="text-center mt-5 col-7 mx-auto h-auto rounded-4">
-        Cargando...
-      </div>
-    );
-  }
+
+  useEffect(() => {
+    const toastShown = localStorage.getItem("toast_shown_once");
+    if (products.length > 0 && !toastShown) {
+      const productsNotAvailable = products
+        .filter((product) => !product.is_available)
+        .map((product) => product.name);
+      if (productsNotAvailable.length > 0) {
+        informToast({
+          message: "Estos productos se encuentran inhabilitados: ",
+          list: productsNotAvailable,
+          postMessage: "Revisa su stock y categoría asociada.",
+        });
+        localStorage.setItem("toast_shown_once", "true");
+      }
+    }
+  }, [products]);
+
   const handleDelete = async (id) => {
     const confirmed = await confirmToast(
       "Realmente quieres cambiar el estado del producto?"
@@ -299,13 +325,47 @@ const ProductList = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: -100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="form-style col-9 mx-auto rounded-4 gap-3 d-flex flex-column">
+          <div className="d-flex justify-content-between">
+            <div className="dropdown mt-4 mx-auto col-3">
+              <button
+                className={`btn secondary-btn-style text-truncate dropdown-toggle w-100 ${
+                  loading ? "disabled2" : ""
+                }`}
+                type="button"
+                onClick={() => setOpen(!open)}
+                disabled={loadingReport || loading}
+              >
+                Generar reporte
+              </button>
+            </div>
+            <h1 className="mt-3 text-center col-lg-3">Lista de Productos</h1>
+            <Link
+              to={loading ? "#" : "/admin/products/new"}
+              onClick={(e) => loading && e.preventDefault()}
+              className={`btn new-btn-style col-3 mx-auto h-25 mt-4 text-truncate`}
+            >
+              Nuevo Producto
+            </Link>
+          </div>
+          <div className="client-loader">
+            <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.3 }}
-    >
+    <>
       {isModalVisible && (
         <div className="d-flex justify-content-center align-items-center event-modal">
           <div
@@ -439,25 +499,25 @@ const ProductList = () => {
             </button>
             {open && (
               <ul className="dropdown-menu bg-dark w-100 show d-flex flex-column align-items-stretch">
-              <li>
-                <button
-                  className="dropdown-item new-btn-style w-75 rounded-3 text-center text-truncate text-white mb-3 mt-2 mx-auto"
-                  onClick={handleInventoryReport}
-                  disabled={loadingReport}
-                >
-                  Inventario
-                </button>
-              </li>
-              <li>
-                <button
-                  className="dropdown-item new-btn-style w-75 rounded-3 text-center text-truncate text-white mx-auto mb-3"
-                  onClick={handleBestSellersReport}
-                  disabled={loadingReport}
-                >
-                  Los + vendidos
-                </button>
-              </li>
-            </ul>
+                <li>
+                  <button
+                    className="dropdown-item new-btn-style w-75 rounded-3 text-center text-truncate text-white mb-3 mt-2 mx-auto"
+                    onClick={handleInventoryReport}
+                    disabled={loadingReport}
+                  >
+                    Inventario
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item new-btn-style w-75 rounded-3 text-center text-truncate text-white mx-auto mb-3"
+                    onClick={handleBestSellersReport}
+                    disabled={loadingReport}
+                  >
+                    Los + vendidos
+                  </button>
+                </li>
+              </ul>
             )}
           </div>
           <h1 className="mt-3 text-center col-lg-3">Lista de Productos</h1>
@@ -469,8 +529,8 @@ const ProductList = () => {
           </Link>
         </div>
         <div className="row justify-content-center gap-lg-1 mt-4 mb-4 col-10 mx-auto">
-          {products.length > 0 ? (
-            products.map((product, index) => (
+          {currentItems.length > 0 ? (
+            currentItems.map((product, index) => (
               <div className="col-12 col-md-8 col-lg-3 mb-4" key={index}>
                 <div
                   className={`card h-100 card-style ${
@@ -569,7 +629,7 @@ const ProductList = () => {
                         className="btn secondary-btn-style"
                         disabled={waitingInput}
                       >
-                        <i className="bx bx-history fs-5"></i>
+                        <i className="bx bx-history fs-6"></i>
                       </button>
                     </div>
                   </div>
@@ -604,9 +664,30 @@ const ProductList = () => {
             <div className="text-center col-12 mb-4">No hay productos aún.</div>
           )}
         </div>
+        <p className="text-center">
+          Mostrando {startIndex}–{endIndex} de {products.length} resultado(s)
+        </p>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Siguiente >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          pageCount={pageCount}
+          previousLabel="< Anterior"
+          renderOnZeroPageCount={null}
+          containerClassName="pagination justify-content-center mt-4 custom-paginate"
+          pageClassName="page-item"
+          pageLinkClassName="page-link custom-page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link custom-page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link custom-page-link"
+          activeClassName="active custom-active"
+        />
       </div>
-    </motion.div>
+    </>
   );
 };
 
 export default ProductList;
+

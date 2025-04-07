@@ -219,3 +219,38 @@
 .reserve-button:active {
   transform: scale(0.95);
 }
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.custom-paginate {
+  padding: 10px 15px;
+  border-radius: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.custom-page-link,
+.previous-link,
+.next-link {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 8px 12px;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.custom-page-link:hover,
+.previous-link:hover,
+.next-link:hover {
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+.custom-active .custom-page-link {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  font-weight: bold;
+}

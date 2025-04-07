@@ -51,7 +51,7 @@ const NewUser = () => {
 
     try {
       const response = await fetchWithAuth(
-        "http://https://bolicheck.onrender.com:8080/api/admin/register",
+        "https://bolicheck.onrender.com/api/admin/register",
         {
           method: "POST",
           headers: {

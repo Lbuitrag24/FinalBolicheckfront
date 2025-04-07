@@ -220,6 +220,11 @@ const Cart = () => {
 
   const handleRedeem = async (event) => {
     event.preventDefault();
+    if (cart2.prizes.length == 0){
+      toast.warning("Debes tener un premio como mínimo para realizar la redención.")
+      return
+    }
+    setLoading(true);
     const redeemData = {
       customer_id: localStorage.getItem("id"),
       prizes: cart2.prizes,
@@ -238,15 +243,18 @@ const Cart = () => {
       );
       const data = await response.json();
       if (response.ok) {
+        setLoading(false);
         toast.success(
           "Has redimido tus puntos satisfactoriamente, acèrcate a una de nuestras sedes con tu cèdula para recibir tu premio."
         );
         localStorage.setItem("cart2", []);
         setCart2({ prizes: [] });
       } else {
+        setLoading(false);
         toast.error(data.message);
       }
     } catch {
+      setLoading(false);
       toast.error(
         "No ha sido posible redimir tus puntos, estàs conectado a internet?"
       );
@@ -306,9 +314,10 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div className="client-form mt-5 p-3 col-9 mx-auto h-auto rounded-4 gap-3 d-flex flex-column">
+      <div className="client-form p-3 col-9 mx-auto h-auto rounded-4 gap-3 d-flex flex-column">
+        <h2 className="mt-3 text-center stext-primary">Realizando tu solicitud...</h2>
         <div className="client-loader">
-          <MoonLoader color="#00B47E" size={50} speedMultiplier={0.8} />
+          <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
         </div>
       </div>
     );
@@ -347,6 +356,7 @@ const Cart = () => {
                 props={handleReserve}
                 reserves={reserves}
                 loading={loading}
+                cart={cart}
               />
             </div>
           </div>

@@ -1,57 +1,66 @@
 import React, { useState, useEffect } from "react";
 import fetchWithAuth from "../../hooks/fetchwithauth";
 import { toast } from "react-toastify";
-const Agregar = ({props}) => {
-    const [events, setEvents]=useState([]);
-    const [eventData, setEventData] = useState({
-        event_type_id: "",
-        date_in: "",
-        date_out: "",
-        num_people: 1,
-      });
-    const [availableSlots, setAvailableSlots] = useState("")
+const Agregar = ({ props, eventData, setEventData }) => {
+  const [events, setEvents] = useState([]);
+  const [availableSlots, setAvailableSlots] = useState("");
+  const [error, setError] = useState(false);
 
-    const fetchAvailableSlots = async () => {
-      setAvailableSlots("Cargando cupos...")
+  const fetchAvailableSlots = async () => {
+    setAvailableSlots("Cargando cupos...");
+    try {
+      const response = await fetchWithAuth(
+        `https://bolicheck.onrender.com/api/reserves/available_slots/?date_in=${encodeURIComponent(
+          eventData.date_in
+        )}&date_out=${encodeURIComponent(eventData.date_out)}`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setAvailableSlots(data.available_slots);
+        setError(false);
+      } else {
+        toast.error(data.message);
+        setAvailableSlots(data.message);
+        setError(true);
+      }
+    } catch (error) {
+      toast.error(
+        "Error al cargar los cupos disponibles, ¿estás conectado a internet?"
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (
+      eventData.date_in &&
+      eventData.date_out &&
+      new Date(eventData.date_in) < new Date(eventData.date_out)
+    ) {
+      fetchAvailableSlots();
+    }
+  }, [eventData.date_in, eventData.date_out]);
+
+  useEffect(() => {
+    const fetchEventData = async () => {
       try {
         const response = await fetchWithAuth(
-          `https://bolicheck.onrender.com/api/reserves/available_slots/?date_in=${encodeURIComponent(eventData.date_in)}&date_out=${encodeURIComponent(eventData.date_out)}`,
+          "https://bolicheck.onrender.com/api/events/",
           {
             method: "GET",
           }
         );
         const data = await response.json();
-        if (response.ok) {
-          setAvailableSlots(data.available_slots);
-        } else {
-          toast.error(data.message);
-        }
+        setEvents(data.filter((event) => event.is_available === true));
       } catch (error) {
-        toast.error("Error al cargar los cupos disponibles, ¿estás conectado a internet?");
+        setError("Error al cargar los eventos");
       }
-    };    
+    };
+    fetchEventData();
+  }, []);
 
-      useEffect(() => {
-        if (eventData.date_in && eventData.date_out && new Date(eventData.date_in) < new Date(eventData.date_out)) {
-          fetchAvailableSlots();
-        }
-      }, [eventData.date_in, eventData.date_out]);      
-
-      useEffect(() => {
-        const fetchEventData = async () => {
-          try {
-            const response = await fetchWithAuth("https://bolicheck.onrender.com/api/events/", {
-              method: "GET",
-            });
-            const data = await response.json();
-            setEvents(data.filter(event => event.is_available === true));        
-          } catch (error) {
-            setError("Error al cargar los eventos");
-          }
-        };
-        fetchEventData();
-      }, []);
-      
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEventData({
@@ -59,15 +68,16 @@ const Agregar = ({props}) => {
       [name]: value,
     });
   };
-
-  const saveReserve=(e)=>{
-    e.preventDefault()
-    props(eventData)
-  }
+  const saveReserve = (e) => {
+    e.preventDefault();
+    props(eventData);
+  };
   return (
     <div className="h-100 d-flex mb-auto mt-md-0 flex-column justify-content-center align-items-center p-3 rounded border border-white">
-      <img src= "/rana.png" className="col-3 col-md-4"/>
-      <h4 className="text-center client-products-text-decorate">Información de la reserva</h4>
+      <img src="/rana.png" className="col-3 col-md-4" />
+      <h4 className="text-center client-products-text-decorate">
+        Información de la reserva
+      </h4>
       <h6>Más información, mejor servicio.</h6>
       <br />
       <form onSubmit={saveReserve}>
@@ -84,11 +94,12 @@ const Agregar = ({props}) => {
             required
           >
             <option value="">Selecciona un evento</option>
-            {events && events.map((event) => (
-              <option key={event.id} value={event.id}>
-                {event.event_type} - {event.description}
-              </option>
-            ))}
+            {events &&
+              events.map((event) => (
+                <option key={event.id} value={event.id}>
+                  {event.event_type} - {event.description}
+                </option>
+              ))}
           </select>
         </div>
         <div className="mb-3">
@@ -113,10 +124,23 @@ const Agregar = ({props}) => {
             required
           />
         </div>
-        {availableSlots && (<p className="text-center text-success">Cupos disponibles para este horario: {availableSlots}</p>)}
-          <div className="mb-3">
-            <label>Cantidad de Personas:</label>
-            <input
+        {availableSlots && (
+          <p className={`text-center ${error ? "text-danger" : "text-success"}`}>
+            {error ? (
+              availableSlots
+            ) : (
+              <>
+                <span style={{ color: "white" }}>
+                  Cupos disponibles para este horario: {" "}
+                </span>
+                {availableSlots}
+              </>
+            )}
+          </p>
+        )}
+        <div className="mb-3">
+          <label>Cantidad de Personas:</label>
+          <input
             type="number"
             name="num_people"
             className="reserve-input col-9"
@@ -133,7 +157,6 @@ const Agregar = ({props}) => {
       </form>
     </div>
   );
-
 };
 
 export default Agregar;

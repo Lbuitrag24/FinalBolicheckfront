@@ -5,21 +5,36 @@ import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
+import ReactPaginate from "react-paginate";
+import { MoonLoader } from "react-spinners";
 const EmployeeSellingList = () => {
-  useEffect(() => {
-      document.title = "Ventas | Bolicheck";
-    }, []);
   const [sellings, setSellings] = useState([]);
+  const [filteredSellings, setFilteredSellings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [estado, setEstado] = useState("todos");
   const [fecha, setFecha] = useState("hoy");
   const [searchTerm, setSearchTerm] = useState("");
+  const ITEMS_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * ITEMS_PER_PAGE;
+  const currentItems = filteredSellings.slice(offset, offset + ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(filteredSellings.length / ITEMS_PER_PAGE);
+  const startIndex = filteredSellings.length === 0 ? 0 : offset + 1;
+  const endIndex = offset + currentItems.length;
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
+
+  useEffect(() => {
+    document.title = "Ventas | Bolicheck";
+  }, []);
 
   const fetchSellings = async () => {
     setLoading(true);
     try {
-      const url = new URL("https://bolicheck.onrender.com/api/staff/sales/");
+      const url = new URL("http://localhost:8080/api/staff/sales/");
       if (estado) url.searchParams.append("estado", estado);
       if (fecha) url.searchParams.append("fecha", fecha);
       const response = await fetchWithAuth(url.toString(), { method: "GET" });
@@ -47,7 +62,7 @@ const EmployeeSellingList = () => {
   const handleConfirm = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `https://bolicheck.onrender.com/api/staff/sales/${id}/confirm/`,
+        `http://localhost:8080/api/staff/sales/${id}/confirm/`,
         {
           method: "POST",
         }
@@ -73,7 +88,7 @@ const EmployeeSellingList = () => {
   const handleCancel = async (id) => {
     try {
       const response = await fetchWithAuth(
-        `https://bolicheck.onrender.com/api/staff/sales/${id}/cancel/`,
+        `http://localhost:8080/api/staff/sales/${id}/cancel/`,
         {
           method: "POST",
         }
@@ -98,20 +113,24 @@ const EmployeeSellingList = () => {
     }
   };
 
-  const filteredSellings = sellings.filter((selling) => {
-    const formattedDate = new Date(selling.date).toLocaleString("es-MX", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return (
-      String(selling.id).includes(searchTerm) ||
-      formattedDate.includes(searchTerm) ||
-      selling?.by?.username?.includes(searchTerm)
+  useEffect(() => {
+    setFilteredSellings(
+      sellings.filter((selling) => {
+        const formattedDate = new Date(selling.date).toLocaleString("es-MX", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        return (
+          String(selling.id).includes(searchTerm) ||
+          formattedDate.includes(searchTerm) ||
+          selling?.by?.username?.includes(searchTerm)
+        );
+      })
     );
-  });
+  }, [searchTerm, sellings]);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -119,9 +138,27 @@ const EmployeeSellingList = () => {
 
   if (loading) {
     return (
-      <div className="text-center mt-5 col-7 mx-auto h-auto rounded-4">
-        Cargando...
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: 100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="col-12 col-lg-9 mx-auto h-auto rounded-4 form-style">
+          <div className="d-flex justify-content-between">
+            <h1 className="text-end col-8 mt-3">Lista de Ventas</h1>
+            <Link
+              to="/employee/sellings/new"
+              className="btn new-btn-style col-3 h-25 mt-4 mx-auto text-truncate"
+            >
+              Nueva Venta
+            </Link>
+          </div>
+          <div className="client-loader">
+            <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
@@ -189,8 +226,8 @@ const EmployeeSellingList = () => {
           </div>
         </div>
         <ul className="list-group mt-4 col-11 mx-auto mb-3 py-3">
-          {filteredSellings.length > 0 ? (
-            filteredSellings.map((selling) => (
+          {currentItems.length > 0 ? (
+            currentItems.map((selling) => (
               <li
                 key={selling.id}
                 className="list-group-item d-flex flex-column mb-2 sellings-card-style"
@@ -200,91 +237,91 @@ const EmployeeSellingList = () => {
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="d-flex align-items-center justify-content-between col-9">
                     <div className="col-12 d-flex justify-content-start align-items-center">
-                    <div
-                      style={{
-                        width: "15px",
-                        height: "15px",
-                        borderRadius: "50%",
-                        backgroundColor:
-                          selling.status === "pendiente"
-                            ? "#fb8500"
-                            : selling.status === "completada"
-                            ? "#2b9348"
-                            : selling.status === "cancelada"
-                            ? "#d62828"
-                            : "gray",
-                        marginRight: "15px",
-                      }}
-                    ></div>
-                    <div className="col-8">
-                      <h5 className="mb-1">
-                        Venta #{selling.id}{" "}
-                        {selling.reserve.length != 0 && (
-                          <span
-                            className="rounded-5"
-                            style={{
-                              backgroundColor: "#62A87C",
-                              width: "50%",
-                              display: "inline-block",
-                              textAlign: "center",
-                              padding: "1px",
-                            }}
-                          >
-                            Reservada
-                          </span>
-                        )}
-                        {selling.is_redemption == true && (
-                          <span
-                            className="rounded-5"
-                            style={{
-                              backgroundColor: "#F39B21",
-                              width: "50%",
-                              display: "inline-block",
-                              textAlign: "center",
-                              padding: "1px",
-                            }}
-                          >
-                            Redención
-                          </span>
-                        )}
-                      </h5>
-                      <p className="mb-1">
-                        Fecha:{" "}
-                        {new Date(selling.date).toLocaleDateString("es-MX")}
-                      </p>
-                      <h5>
-                        <b>
-                          Total:{" "}
-                          {selling.is_redemption
-                            ? `${selling.total}pts.`
-                            : `$${selling.total}`}
-                        </b>
-                      </h5>
+                      <div
+                        style={{
+                          width: "15px",
+                          height: "15px",
+                          borderRadius: "50%",
+                          backgroundColor:
+                            selling.status === "pendiente"
+                              ? "#fb8500"
+                              : selling.status === "completada"
+                              ? "#2b9348"
+                              : selling.status === "cancelada"
+                              ? "#d62828"
+                              : "gray",
+                          marginRight: "15px",
+                        }}
+                      ></div>
+                      <div className="col-8">
+                        <h5 className="mb-1">
+                          Venta #{selling.id}{" "}
+                          {selling.reserve.length != 0 && (
+                            <span
+                              className="rounded-5"
+                              style={{
+                                backgroundColor: "#62A87C",
+                                width: "50%",
+                                display: "inline-block",
+                                textAlign: "center",
+                                padding: "1px",
+                              }}
+                            >
+                              Reservada
+                            </span>
+                          )}
+                          {selling.is_redemption == true && (
+                            <span
+                              className="rounded-5"
+                              style={{
+                                backgroundColor: "#F39B21",
+                                width: "50%",
+                                display: "inline-block",
+                                textAlign: "center",
+                                padding: "1px",
+                              }}
+                            >
+                              Redención
+                            </span>
+                          )}
+                        </h5>
+                        <p className="mb-1">
+                          Fecha:{" "}
+                          {new Date(selling.date).toLocaleDateString("es-MX")}
+                        </p>
+                        <h5>
+                          <b>
+                            Total:{" "}
+                            {selling.is_redemption
+                              ? `${selling.total}pts.`
+                              : `$${selling.total}`}
+                          </b>
+                        </h5>
+                      </div>
                     </div>
+                    {selling.status == "pendiente" && (
+                      <div className="btn-group gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleConfirm(selling.id);
+                          }}
+                          className="btn btn-sm btn-success"
+                        >
+                          Finalizar
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCancel(selling.id);
+                          }}
+                          className="btn btn-sm btn-danger"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  {selling.status == "pendiente" && (
-                    <div className="btn-group gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleConfirm(selling.id);
-                        }}
-                        className="btn btn-sm btn-success"
-                      >
-                        Finalizar
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCancel(selling.id);
-                        }}
-                        className="btn btn-sm btn-danger"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                  )}
-                </div>
                 </div>
                 {expandedId === selling.id && (
                   <div className="mb-3 p-2 rounded">
@@ -319,12 +356,24 @@ const EmployeeSellingList = () => {
                               style={{ objectFit: "cover" }}
                             />
                             <div className="col-12 my-auto col-lg-5">
-                            <h4 className="text-center text-truncate">
+                              <h4 className="text-center text-truncate">
                                 {product.product.name}
                               </h4>
                               <h5 className="text-center">
-                              {product.is_offer == true ? <><del>${product.product.price}</del> <span className="text-success">${product.unit_price == 0 ? "Gratis" : product.unit_price}</span></> : `$${product.product.price}`}
-                            </h5>
+                                {product.is_offer == true ? (
+                                  <>
+                                    <del>${product.product.price}</del>{" "}
+                                    <span className="text-success">
+                                      $
+                                      {product.unit_price == 0
+                                        ? "Gratis"
+                                        : product.unit_price}
+                                    </span>
+                                  </>
+                                ) : (
+                                  `$${product.product.price}`
+                                )}
+                              </h5>
                               <h6
                                 className="text-center w-50 mx-auto rounded-5"
                                 style={{ backgroundColor: "gray" }}
@@ -332,7 +381,7 @@ const EmployeeSellingList = () => {
                                 {product?.product?.category?.name ?? "N/A"}
                               </h6>
                               <p className="text-center mb-0">
-                              <i>
+                                <i>
                                   {product?.product?.points ?? "N/A"} pts. C/U
                                 </i>
                               </p>
@@ -344,10 +393,15 @@ const EmployeeSellingList = () => {
                               </p>
                             </div>
                             <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                            <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                              {product.quantity} x ${product.unit_price}
-                            </h5>
-                              <h4 className="text-center col-12 col-lg-6">${product.subtotal}</h4>
+                              <h5
+                                style={{ color: "gray" }}
+                                className="text-center col-12 col-lg-6"
+                              >
+                                {product.quantity} x ${product.unit_price}
+                              </h5>
+                              <h4 className="text-center col-12 col-lg-6">
+                                ${product.subtotal}
+                              </h4>
                             </div>
                           </div>
                         ))
@@ -362,7 +416,7 @@ const EmployeeSellingList = () => {
                               style={{ objectFit: "cover" }}
                             />
                             <div className="col-12 my-auto col-lg-5">
-                            <h4 className="text-center text-truncate">
+                              <h4 className="text-center text-truncate">
                                 {prize.prize.name}
                               </h4>
                               <h5 className="text-center">
@@ -376,9 +430,12 @@ const EmployeeSellingList = () => {
                               </p>
                             </div>
                             <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                            <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                              {prize.quantity} x {prize.prize.required_points}
-                            </h5>
+                              <h5
+                                style={{ color: "gray" }}
+                                className="text-center col-12 col-lg-6"
+                              >
+                                {prize.quantity} x {prize.prize.required_points}
+                              </h5>
                               <h4 className="text-center col-12 col-lg-6">
                                 {prize.subtotal}pts.
                               </h4>
@@ -387,44 +444,44 @@ const EmployeeSellingList = () => {
                         ))}
                     {selling.reserve.length != 0 && (
                       <div>
-                      <p>
-                        <strong>Detalles de la reserva:</strong>
-                      </p>
-                      <ul>
-                        <li>
-                          <p>
-                            <strong>Evento: </strong>
-                            {selling.reserve[0].event_type.event_type}
-                          </p>
-                        </li>
-                        <li>
-                          <p>
-                            <strong>Asistentes: </strong>
-                            {selling.reserve[0].num_people}
-                          </p>
-                        </li>
-                        <li>
-                          <p>
-                            <strong>Fecha y hora de entrada: </strong>
-                            {format(
-                              new Date(selling.reserve[0].date_in),
-                              "E'.' dd/MM/yyyy 'a las' HH:mm",
-                              { locale: es }
-                            )}
-                          </p>
-                        </li>
-                        <li>
-                          <p>
-                            <strong>Fecha y hora de salida: </strong>
-                            {format(
-                              new Date(selling.reserve[0].date_out),
-                              "E'.' dd/MM/yyyy 'a las' HH:mm",
-                              { locale: es }
-                            )}
-                          </p>
-                        </li>
-                      </ul>
-                    </div>
+                        <p>
+                          <strong>Detalles de la reserva:</strong>
+                        </p>
+                        <ul>
+                          <li>
+                            <p>
+                              <strong>Evento: </strong>
+                              {selling.reserve[0].event_type.event_type}
+                            </p>
+                          </li>
+                          <li>
+                            <p>
+                              <strong>Asistentes: </strong>
+                              {selling.reserve[0].num_people}
+                            </p>
+                          </li>
+                          <li>
+                            <p>
+                              <strong>Fecha y hora de entrada: </strong>
+                              {format(
+                                new Date(selling.reserve[0].date_in),
+                                "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                { locale: es }
+                              )}
+                            </p>
+                          </li>
+                          <li>
+                            <p>
+                              <strong>Fecha y hora de salida: </strong>
+                              {format(
+                                new Date(selling.reserve[0].date_out),
+                                "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                { locale: es }
+                              )}
+                            </p>
+                          </li>
+                        </ul>
+                      </div>
                     )}
                   </div>
                 )}
@@ -434,6 +491,26 @@ const EmployeeSellingList = () => {
             <div className="text-center mt-3 mb-4">No hay ventas aún.</div>
           )}
         </ul>
+        <p className="text-center">
+          Mostrando {startIndex}–{endIndex} de {sellings.length} resultado(s)
+        </p>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Siguiente >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          pageCount={pageCount}
+          previousLabel="< Anterior"
+          renderOnZeroPageCount={null}
+          containerClassName="pagination justify-content-center mt-4 custom-paginate"
+          pageClassName="page-item"
+          pageLinkClassName="page-link custom-page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link custom-page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link custom-page-link"
+          activeClassName="active custom-active"
+        />
       </div>
     </motion.div>
   );

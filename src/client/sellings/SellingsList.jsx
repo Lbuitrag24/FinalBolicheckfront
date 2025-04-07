@@ -1,14 +1,32 @@
 import React from "react";
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import ReactPaginate from "react-paginate";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import fetchWithAuth from "../../hooks/fetchwithauth";
+import { MoonLoader } from "react-spinners";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 export const ClientSellingList = () => {
+  useEffect(() => {
+    document.title = "Tus Compras | Bolicheck";
+  }, []);
   const [sellings, setSellings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * ITEMS_PER_PAGE;
+  const currentItems = sellings.slice(offset, offset + ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(sellings.length / ITEMS_PER_PAGE);
+  const startIndex = sellings.length === 0 ? 0 : offset + 1;
+  const endIndex = offset + currentItems.length;
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
+
   const fetchSellings = async () => {
     setLoading(true);
     try {
@@ -29,7 +47,9 @@ export const ClientSellingList = () => {
       setLoading(false);
     }
   };
+
   const handleCancel = async (id) => {
+    setLoadingCancel(true);
     try {
       const response = await fetchWithAuth(
         `https://bolicheck.onrender.com/api/sales/${id}/cancel/`,
@@ -52,20 +72,34 @@ export const ClientSellingList = () => {
       toast.error(
         "Ha ocurrido un error al cancelar la venta, estás conectado a internet?"
       );
+    } finally {
+      setLoadingCancel(false);
     }
   };
+
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
   useEffect(() => {
     fetchSellings();
   }, []);
 
   if (loading) {
     return (
-      <div className="text-center mt-5 col-7 mx-auto h-auto rounded-4">
-        Cargando...
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: 100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="col-12 col-md-9 mx-auto h-100 rounded-4 overflow-auto client-form-styled">
+          <h1 className="text-center col-12 mt-3">Tus compras</h1>
+          <div className="client-loader">
+            <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
@@ -76,236 +110,301 @@ export const ClientSellingList = () => {
       exit={{ opacity: 0, x: -100 }}
       transition={{ duration: 0.3 }}
     >
-    <div
-      className="col-12 col-md-9 mx-auto h-100 rounded-4 overflow-auto client-form-styled"
-    >
-      <div className="d-flex justify-content-between">
+      <div className="col-12 col-md-9 mx-auto h-100 rounded-4 overflow-auto client-form-styled">
         <h1 className="text-center col-12 mt-3">Tus compras</h1>
-      </div>
-      <ul className="list-group mt-1 col-11 mx-auto mb-3">
-        {sellings.length > 0 ? (
-          sellings.map((selling) => (
-            <li
-              key={selling.id}
-              className="list-group-item d-flex flex-column mb-2 border-0"
-              style={{ backgroundColor: "#2E2E2E", cursor: "pointer", color: "white" }}
-              onClick={() => toggleExpand(selling.id)}
-            >
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center col-8">
-                  <div
-                    style={{
-                      width: "15px",
-                      height: "15px",
-                      borderRadius: "50%",
-                      backgroundColor:
-                        selling.status === "pendiente"
-                          ? "#fb8500"
-                          : selling.status === "completada"
-                          ? "#2b9348"
-                          : selling.status === "cancelada"
-                          ? "#d62828"
-                          : "gray",
-                      marginRight: "15px",
-                    }}
-                  ></div>
-                  <div className="col-8" style={{textDecoration:selling.status == "cancelada" && "line-through", color:selling.status == "cancelada" && "gray"}}>
-                    <h5 className="mb-1">
-                      Venta #{selling.id}{" "}
-                      {selling.reserve.length != 0 && (
-                        <span
-                          className="rounded-5"
-                          style={{
-                            backgroundColor: "#62A87C",
-                            width: "fit-content",
-                            display: "inline-block", 
-                            textAlign: "center",
-                            padding: "1px 15px",
-                          }}
-                        >
-                          Reservada
-                        </span>
-                      )}
-                      {selling.is_redemption == true && (
-                        <span
-                          className="rounded-5"
-                          style={{
-                            backgroundColor: "#F39B21",
-                            width: "fit-content",
-                            display: "inline-block", 
-                            textAlign: "center",
-                            padding: "1px 15px",
-                          }}
-                        >
-                          Redención
-                        </span>
-                      )}
-                    </h5>
-                    <p className="mb-1">
-                      Fecha:{" "}
-                      {new Date(selling.date).toLocaleDateString("es-MX")}
-                    </p>
-                    <h5>
-                      <b>
-                        Total:{" "}
-                        {selling.is_redemption
-                          ? `${selling.total}pts.`
-                          : `$${selling.total}`}
-                      </b>
-                    </h5>
-                  </div>
-                </div>
-                {selling.status == "pendiente" && (
-                  <div className="btn-group gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCancel(selling.id);
+        <ul className="list-group mt-1 col-11 mx-auto mb-3">
+          {currentItems.length > 0 ? (
+            currentItems.map((selling) => (
+              <li
+                key={selling.id}
+                className="list-group-item d-flex flex-column mb-2 border-0"
+                style={{
+                  backgroundColor: "#2E2E2E",
+                  cursor: "pointer",
+                  color: "white",
+                }}
+                onClick={() => toggleExpand(selling.id)}
+              >
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex align-items-center col-8">
+                    <div
+                      style={{
+                        width: "15px",
+                        height: "15px",
+                        borderRadius: "50%",
+                        backgroundColor:
+                          selling.status === "pendiente"
+                            ? "#fb8500"
+                            : selling.status === "completada"
+                            ? "#2b9348"
+                            : selling.status === "cancelada"
+                            ? "#d62828"
+                            : "gray",
+                        marginRight: "15px",
                       }}
-                      className="btn btn-sm client-thirdary-btn"
+                    ></div>
+                    <div
+                      className="col-8"
+                      style={{
+                        textDecoration:
+                          selling.status == "cancelada" && "line-through",
+                        color: selling.status == "cancelada" && "gray",
+                      }}
                     >
-                      Cancelar
-                    </button>
-                  </div>
-                )}
-              </div>
-              {expandedId === selling.id && (
-                <div className="mb-3 p-2 bg-dark rounded h-auto">
-                  <p>
-                    <strong>Estado:</strong> {selling.status}
-                    {selling.status == "cancelada"
-                      ? selling.admin_cancel
-                        ? ", por uno de nuestros integrantes de staff."
-                        : ", por tí."
-                      : ""}
-                  </p>
-                  <p>
-                    <strong>
-                      {selling.is_redemption ? "Premios:" : "Productos:"}
-                    </strong>
-                  </p>
-                  <div className="d-flex flex-column gap-3">
-                  {!selling.is_redemption
-                    ? selling.products.map((product, i) => (
-                        <div
-                          className="card col-12 col-md-10 mx-auto client-card align-items-between gap-3 flex-lg-row p-3 mb-2"
-                          key={i}
-                        >
-                          <img
-                            src={product.product.image}
-                            className="col-12 col-lg-3 h-100 h-lg-auto"
-                            style={{ objectFit: "cover" }}
-                          />
-                          <div className="col-12 my-auto col-lg-5">
-                            <h4 className="text-center text-truncate">
-                              {product.product.name}
-                            </h4>
-                            <h5 className="text-center">
-                              {product.product.offered_price != null ? <><del>${product.product.price}</del> <span className="text-success">${product.product.offered_price}</span></> : `$${product.product.price}`}
-                            </h5>
-                            <h6
-                              className="text-center w-50 mx-auto rounded-5"
-                              style={{ backgroundColor: "gray" }}
-                            >
-                              {product.product.category.name}
-                            </h6>
-                            <p className="text-center mb-0">
-                              <i>{product.product.points}pts. C/U</i>
-                            </p>
-                            <p
-                              className="text-center text-truncate"
-                              style={{ color: "gray" }}
-                            >
-                              {product.product.description}
-                            </p>
-                          </div>
-                          <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                            <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                              {product.quantity} x ${product.product.offered_price != null ? product.product.offered_price : product.product.price}
-                            </h5>
-                            <h4 className="text-center col-12 col-lg-6">{product.subtotal}</h4>
-                          </div>
-                        </div>
-                      ))
-                    : selling.prizes.map((prize, i) => (
-                      <div
-                        className="card col-12 col-lg-10 mx-auto client-card align-items-between gap-3 flex-lg-row p-3 mb-2"
-                        key={i}
-                      >
-                        <img
-                          src={prize.prize.image}
-                          className="col-12 col-lg-2"
-                          style={{ objectFit: "cover" }}
-                        />
-                        <div className="col-12 my-auto col-lg-5">
-                          <h4 className="text-center text-truncate">{prize.prize.name}</h4>
-                          <h5 className="text-center">{prize.prize.required_points} pts. C/U</h5>
-                          <p
-                            className="text-center text-truncate"
-                            style={{ color: "gray" }}
+                      <h5 className="mb-1">
+                        Venta #{selling.id}{" "}
+                        {selling.reserve.length != 0 && (
+                          <span
+                            className="rounded-5"
+                            style={{
+                              backgroundColor: "#62A87C",
+                              width: "fit-content",
+                              display: "inline-block",
+                              textAlign: "center",
+                              padding: "1px 15px",
+                            }}
                           >
-                            {prize.prize.description}
-                          </p>
-                        </div>
-                        <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
-                          <h5 style={{ color: "gray" }} className="text-center col-12 col-lg-6">
-                            {prize.quantity} x {prize.prize.required_points} pts.
-                          </h5>
-                          <h4 className="text-center col-12 col-lg-6">{prize.subtotal} pts.</h4>
-                        </div>
-                      </div>
-                    ))}                    
-                  {selling.reserve.length != 0 && (
-                    <div>
-                      <p className="col-12 col-md-12 mx-auto text-center text-md-start">
-                        <strong>Detalles de la reserva:</strong>
+                            Reservada
+                          </span>
+                        )}
+                        {selling.is_redemption == true && (
+                          <span
+                            className="rounded-5"
+                            style={{
+                              backgroundColor: "#F39B21",
+                              width: "fit-content",
+                              display: "inline-block",
+                              textAlign: "center",
+                              padding: "1px 15px",
+                            }}
+                          >
+                            Redención
+                          </span>
+                        )}
+                      </h5>
+                      <p className="mb-1">
+                        Fecha:{" "}
+                        {new Date(selling.date).toLocaleDateString("es-MX")}
                       </p>
-                      <ul className="col-12 col-md-10 mx-auto">
-                        <li>
-                          <p className="col-12 col-md-10 mx-auto text-center text-md-start">
-                            <strong>Evento: </strong>
-                            {selling.reserve[0].event_type.event_type}
-                          </p>
-                        </li>
-                        <li>
-                            <p className="col-12 col-md-10 mx-auto text-center text-md-start">
-                              <strong>Asistentes: </strong>
-                              {selling.reserve[0].num_people}
-                            </p>
-                          </li>
-                        <li>
-                          <p className="col-12 col-md-10 mx-auto text-center text-md-start">
-                            <strong>Fecha y hora de entrada: </strong>
-                            {format(
-                              new Date(selling.reserve[0].date_in),
-                              "E'.' dd/MM/yyyy 'a las' HH:mm",
-                              { locale: es }
-                            )}
-                          </p>
-                        </li>
-                        <li>
-                          <p className="col-12 col-md-10 mx-auto text-center text-md-start">
-                            <strong>Fecha y hora de salida: </strong>
-                            {format(
-                              new Date(selling.reserve[0].date_out),
-                              "E'.' dd/MM/yyyy 'a las' HH:mm",
-                              { locale: es }
-                            )}
-                          </p>
-                        </li>
-                      </ul>
+                      <h5>
+                        <b>
+                          Total:{" "}
+                          {selling.is_redemption
+                            ? `${selling.total}pts.`
+                            : `$${selling.total}`}
+                        </b>
+                      </h5>
+                    </div>
+                  </div>
+                  {selling.status == "pendiente" && (
+                    <div className="btn-group gap-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancel(selling.id);
+                        }}
+                        className="btn btn-sm client-thirdary-btn d-flex"
+                      >
+                        {loadingCancel ? (
+                          <MoonLoader
+                            color="#FFF"
+                            size={15}
+                            speedMultiplier={1.5}
+                          />
+                        ) : (
+                          "Cancelar"
+                        )}
+                      </button>
                     </div>
                   )}
-                  </div>
                 </div>
-              )}
-            </li>
-          ))
-        ) : (
-          <div className="text-center mt-3 mb-4">Aquí podrás ver el historial de tus compras.</div>
-        )}
-      </ul>
-    </div>
+                {expandedId === selling.id && (
+                  <div className="mb-3 p-2 bg-dark rounded h-auto">
+                    <p>
+                      <strong>Estado:</strong> {selling.status}
+                      {selling.status == "cancelada"
+                        ? selling.admin_cancel
+                          ? ", por uno de nuestros integrantes de staff."
+                          : ", por tí."
+                        : ""}
+                    </p>
+                    <p>
+                      <strong>
+                        {selling.is_redemption ? "Premios:" : "Productos:"}
+                      </strong>
+                    </p>
+                    <div className="d-flex flex-column gap-3">
+                      {!selling.is_redemption
+                        ? selling.products.map((product, i) => (
+                            <div
+                              className="card col-12 col-md-10 mx-auto client-card align-items-between gap-3 flex-lg-row p-3 mb-2"
+                              key={i}
+                            >
+                              <img
+                                src={product.product.image}
+                                className="col-12 col-lg-3 h-100 h-lg-auto"
+                                style={{ objectFit: "cover" }}
+                              />
+                              <div className="col-12 my-auto col-lg-5">
+                                <h4 className="text-center text-truncate">
+                                  {product.product.name}
+                                </h4>
+                                <h5 className="text-center">
+                                  {product.product.offered_price != null ? (
+                                    <>
+                                      <del>${product.product.price}</del>{" "}
+                                      <span className="text-success">
+                                        ${product.product.offered_price}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    `$${product.product.price}`
+                                  )}
+                                </h5>
+                                <h6
+                                  className="text-center w-50 mx-auto rounded-5"
+                                  style={{ backgroundColor: "gray" }}
+                                >
+                                  {product.product.category.name}
+                                </h6>
+                                <p className="text-center mb-0">
+                                  <i>{product.product.points}pts. C/U</i>
+                                </p>
+                                <p
+                                  className="text-center text-truncate"
+                                  style={{ color: "gray" }}
+                                >
+                                  {product.product.description}
+                                </p>
+                              </div>
+                              <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
+                                <h5
+                                  style={{ color: "gray" }}
+                                  className="text-center col-12 col-lg-6"
+                                >
+                                  {product.quantity} x $
+                                  {product.product.offered_price != null
+                                    ? product.product.offered_price
+                                    : product.product.price}
+                                </h5>
+                                <h4 className="text-center col-12 col-lg-6">
+                                  {product.subtotal}
+                                </h4>
+                              </div>
+                            </div>
+                          ))
+                        : selling.prizes.map((prize, i) => (
+                            <div
+                              className="card col-12 col-lg-10 mx-auto client-card align-items-between gap-3 flex-lg-row p-3 mb-2"
+                              key={i}
+                            >
+                              <img
+                                src={prize.prize.image}
+                                className="col-12 col-lg-2"
+                                style={{ objectFit: "cover" }}
+                              />
+                              <div className="col-12 my-auto col-lg-5">
+                                <h4 className="text-center text-truncate">
+                                  {prize.prize.name}
+                                </h4>
+                                <h5 className="text-center">
+                                  {prize.prize.required_points} pts. C/U
+                                </h5>
+                                <p
+                                  className="text-center text-truncate"
+                                  style={{ color: "gray" }}
+                                >
+                                  {prize.prize.description}
+                                </p>
+                              </div>
+                              <div className="col-12 col-lg-3 d-flex flex-column justify-content-center align-items-start">
+                                <h5
+                                  style={{ color: "gray" }}
+                                  className="text-center col-12 col-lg-6"
+                                >
+                                  {prize.quantity} x{" "}
+                                  {prize.prize.required_points} pts.
+                                </h5>
+                                <h4 className="text-center col-12 col-lg-6">
+                                  {prize.subtotal} pts.
+                                </h4>
+                              </div>
+                            </div>
+                          ))}
+                      {selling.reserve.length != 0 && (
+                        <div>
+                          <p className="col-12 col-md-12 mx-auto text-center text-md-start">
+                            <strong>Detalles de la reserva:</strong>
+                          </p>
+                          <ul className="col-12 col-md-10 mx-auto">
+                            <li>
+                              <p className="col-12 col-md-10 mx-auto text-center text-md-start">
+                                <strong>Evento: </strong>
+                                {selling.reserve[0].event_type.event_type}
+                              </p>
+                            </li>
+                            <li>
+                              <p className="col-12 col-md-10 mx-auto text-center text-md-start">
+                                <strong>Asistentes: </strong>
+                                {selling.reserve[0].num_people}
+                              </p>
+                            </li>
+                            <li>
+                              <p className="col-12 col-md-10 mx-auto text-center text-md-start">
+                                <strong>Fecha y hora de entrada: </strong>
+                                {format(
+                                  new Date(selling.reserve[0].date_in),
+                                  "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                  { locale: es }
+                                )}
+                              </p>
+                            </li>
+                            <li>
+                              <p className="col-12 col-md-10 mx-auto text-center text-md-start">
+                                <strong>Fecha y hora de salida: </strong>
+                                {format(
+                                  new Date(selling.reserve[0].date_out),
+                                  "E'.' dd/MM/yyyy 'a las' HH:mm",
+                                  { locale: es }
+                                )}
+                              </p>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </li>
+            ))
+          ) : (
+            <div className="text-center mt-3 mb-4">
+              Aquí podrás ver el historial de tus compras.
+            </div>
+          )}
+        </ul>
+        <p className="text-center">
+          Mostrando {startIndex}–{endIndex} de {sellings.length}{" "}
+          resultado(s)
+        </p>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Siguiente >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          pageCount={pageCount}
+          previousLabel="< Anterior"
+          renderOnZeroPageCount={null}
+          containerClassName="pagination justify-content-center mt-4 custom-paginate"
+          pageClassName="page-item"
+          pageLinkClassName="page-link custom-page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link custom-page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link custom-page-link"
+          activeClassName="active custom-active"
+        />
+      </div>
     </motion.div>
   );
 };

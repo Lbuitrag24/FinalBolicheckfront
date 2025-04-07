@@ -3,12 +3,13 @@ import fetchWithAuth from "../../hooks/fetchwithauth";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { MoonLoader } from "react-spinners";
 import useConfirmToast from "../../hooks/confirmToast";
 
 const EventList = () => {
   useEffect(() => {
-          document.title = "Eventos | Bolicheck"
-      }, [])
+    document.title = "Eventos | Bolicheck";
+  }, []);
   const confirmToast = useConfirmToast();
   const [events, setEvents] = useState([]);
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ const EventList = () => {
     const fetchEvents = async () => {
       try {
         const response = await fetchWithAuth(
-          "https://bolicheck.onrender.com/api/events/",
+          "http://localhost:8080/api/events/",
           {
             method: "GET",
           }
@@ -44,17 +45,27 @@ const EventList = () => {
 
   if (loading) {
     return (
-      <div className="text-center mt-5 col-7 mx-auto h-auto rounded-4">
-        Cargando...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center mt-5 col-7 mx-auto h-auto rounded-4">
-        {error}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: -100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="form-style col-9 mx-auto rounded-4 gap-3 d-flex flex-column">
+          <div className="d-flex justify-content-between">
+            <h1 className="mt-4 text-end col-8">Lista de Eventos</h1>
+            <Link
+              to="/admin/events/new"
+              className="btn new-btn-style col-3 mx-auto h-25 mt-4 text-truncate"
+            >
+              Nuevo Evento
+            </Link>
+          </div>
+          <div className="client-loader">
+            <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
+          </div>
+        </div>
+      </motion.div>
     );
   }
 
@@ -67,16 +78,18 @@ const EventList = () => {
     }
     try {
       const response = await fetchWithAuth(
-        `https://bolicheck.onrender.com/api/events/${id}/changestate/`,
+        `http://localhost:8080/api/events/${id}/changestate/`,
         {
           method: "POST",
         }
       );
-      const data = await response.json()
+      const data = await response.json();
       if (response.ok) {
         setEvents((prevEvents) =>
-          prevEvents.map((event) => 
-            event.id === id ? { ...event, is_available: !event.is_available} : event
+          prevEvents.map((event) =>
+            event.id === id
+              ? { ...event, is_available: !event.is_available }
+              : event
           )
         );
         toast.success(data.message);
@@ -91,15 +104,7 @@ const EventList = () => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.3 }}
-    >
-    <div
-      className="col-12 col-lg-9 mx-auto h-auto rounded-4 form-style"
-    >
+    <div className="col-12 col-lg-9 mx-auto h-auto rounded-4 form-style">
       <div className="d-flex justify-content-between">
         <h1 className="mt-4 text-end col-8">Lista de Eventos</h1>
         <Link
@@ -117,15 +122,17 @@ const EventList = () => {
               className="col-12 col-md-8 col-lg-4 mb-3 d-flex justify-content-center"
               key={index}
             >
-              <div
-                className="card rounded-4 col-12 card-style"
-              >
+              <div className="card rounded-4 col-12 card-style">
                 <div className="card-body d-flex flex-column justify-content-between">
                   <h5 className="mt-2 text-center">{event.event_type}</h5>
                   <p className="text-center">{event.description}</p>
-                  <p className={`text-center ${!event.is_available ? "text-disabled" : ""}`}>
-                        {event.is_available ? "Disponible" : "No disponible"}
-                      </p>
+                  <p
+                    className={`text-center ${
+                      !event.is_available ? "text-disabled" : ""
+                    }`}
+                  >
+                    {event.is_available ? "Disponible" : "No disponible"}
+                  </p>
                   <div className="d-flex justify-content-center gap-2 mt-3">
                     <a
                       href={`/admin/events/edit/${event.id}`}
@@ -134,11 +141,15 @@ const EventList = () => {
                       Editar
                     </a>
                     <button
-                        onClick={() => handleDelete(event.id)}
-                        className={`btn ${event.is_available ? "delete-btn-style" : "new-btn-style"}`}
-                      >
-                        {event.is_available ? "Inabilitar" : "Habilitar"}
-                      </button>
+                      onClick={() => handleDelete(event.id)}
+                      className={`btn ${
+                        event.is_available
+                          ? "delete-btn-style"
+                          : "new-btn-style"
+                      }`}
+                    >
+                      {event.is_available ? "Inhabilitar" : "Habilitar"}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -149,7 +160,6 @@ const EventList = () => {
         )}
       </div>
     </div>
-    </motion.div>
   );
 };
 

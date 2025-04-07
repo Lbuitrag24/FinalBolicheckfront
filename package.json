@@ -25,6 +25,7 @@
     "react-dnd-multi-backend": "^9.0.0",
     "react-dom": "^18.3.1",
     "react-modal": "^3.16.3",
+    "react-paginate": "^8.3.0",
     "react-router-dom": "^7.0.1",
     "react-spinners": "^0.15.0",
     "react-toastify": "^11.0.3"

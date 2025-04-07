@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 import fetchWithAuth from "../../hooks/fetchwithauth";
 import { toast } from "react-toastify";
 import "./product.css";
@@ -18,6 +18,18 @@ const ClientProductList = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [modalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(0);
+  const offset = currentPage * ITEMS_PER_PAGE;
+  const currentItems = filteredProducts.slice(offset, offset + ITEMS_PER_PAGE);
+  const pageCount = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const startIndex = filteredProducts.length === 0 ? 0 : offset + 1;
+  const endIndex = offset + currentItems.length;
+
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
   const maxPrice = products.reduce(
     (max, p) => (p.price > max ? p.price : max),
     0
@@ -127,15 +139,17 @@ const ClientProductList = () => {
     fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter((product) => {
-    const categoryMatch =
-      !selectedCategories.length ||
-      selectedCategories.includes(String(product.category.id));
-
-    const priceMatch = price === 0 || product.price <= price;
-
-    return categoryMatch && priceMatch;
-  });
+  useEffect(() => {
+    setFilteredProducts(
+      products.filter((product) => {
+        const categoryMatch =
+          !selectedCategories.length ||
+          selectedCategories.includes(String(product.category.id));
+        const priceMatch = price === 0 || product.price <= price;
+        return categoryMatch && priceMatch;
+      })
+    );
+  }, [selectedCategories, price, products]);
 
   const handleCategoryClick = (id) => {
     setSelectedCategories((prevCategories) =>
@@ -287,7 +301,7 @@ const ClientProductList = () => {
       <div className="client-form col-12 col-lg-10 mx-auto h-auto rounded-4">
         {loading ? (
           <div className="client-loader">
-            <MoonLoader color="#00B47E" size={50} speedMultiplier={0.8} />
+            <MoonLoader color="#FFF" size={50} speedMultiplier={0.8} />
           </div>
         ) : (
           <>
@@ -301,9 +315,12 @@ const ClientProductList = () => {
               </h1>
             </div>
             <div className="row mt-4 col-10 gap-1 mx-auto justify-content-center">
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product, index) => (
-                  <div className="col-sm-12 col-md-5 col-xl-4 col-xxl-3 mb-4 mb-4" key={index}>
+              {currentItems.length > 0 ? (
+                currentItems.map((product, index) => (
+                  <div
+                    className="col-sm-12 col-md-5 col-xl-4 col-xxl-3 mb-4 mb-4"
+                    key={index}
+                  >
                     <div
                       className={`${
                         product.is_available
@@ -431,6 +448,27 @@ const ClientProductList = () => {
             </div>
           </>
         )}
+        <p className="text-center">
+          Mostrando {startIndex}–{endIndex} de {filteredProducts.length}{" "}
+          resultado(s)
+        </p>
+        <ReactPaginate
+          breakLabel="..."
+          nextLabel="Siguiente >"
+          onPageChange={handlePageClick}
+          pageRangeDisplayed={3}
+          pageCount={pageCount}
+          previousLabel="< Anterior"
+          renderOnZeroPageCount={null}
+          containerClassName="pagination justify-content-center mt-4 custom-paginate"
+          pageClassName="page-item"
+          pageLinkClassName="page-link custom-page-link"
+          previousClassName="page-item"
+          previousLinkClassName="page-link custom-page-link"
+          nextClassName="page-item"
+          nextLinkClassName="page-link custom-page-link"
+          activeClassName="active custom-active"
+        />
       </div>
     </motion.div>
   );

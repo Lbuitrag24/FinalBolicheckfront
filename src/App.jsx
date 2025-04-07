@@ -42,6 +42,7 @@ import EmployeeProductList from "./employee/products/ProductsList";
 import EmployeeSellingList from "./employee/sellings/SellingsList";
 import ClientSellingList from "./client/sellings/SellingsList";
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Unauthorized from "./Unauthorized";
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/reset-password-form" element={<ResetPassword />} />
         <Route path="/reset-password/:uid/:token" element={<ChangePassword />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
 
         {/* ADMIN */}
         <Route

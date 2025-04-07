@@ -1,18 +1,21 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import moment from "moment";
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "./calendar.css";
 import { MoonLoader } from "react-spinners";
 import EventModal from "./EventModal";
 import Agregar from "./agregar_reserva";
-
-const DragAndDropCalendar = withDragAndDrop(Calendar);
+import { toast } from "react-toastify";
 const localizer = momentLocalizer(moment);
-
-function CalendarComponent({ props, reserves, loading }) {
+function CalendarComponent({ props, reserves, loading, cart }) {
+  const [eventData, setEventData] = useState({
+    event_type_id: "",
+    date_in: "",
+    date_out: "",
+    num_people: 1,
+  });
   const [eventos, setEventos] = useState(reserves);
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
 
@@ -52,7 +55,7 @@ function CalendarComponent({ props, reserves, loading }) {
       cursor: "pointer",
       transition: "0.3s",
     };
-  
+
     if (event.color === "#00AD2B") {
       style = {
         ...style,
@@ -81,33 +84,80 @@ function CalendarComponent({ props, reserves, loading }) {
       };
     }
     return { style };
-  };   
+  };
 
-  if(loading){
-    return(
+  const formatToLocalDatetime = (date) => {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+
+  const setTime = (time) => {
+    console.log(cart.products.length)
+    if(cart.products.length == 0){
+      toast.warning("Debes tener mínimo un producto en el carrito para reservar.")
+      return
+    }
+    const localDatetime = formatToLocalDatetime(time);
+    const newDate = new Date(localDatetime);
+    const dateIn = new Date(eventData.date_in);
+  
+    if (!eventData.date_in || isNaN(dateIn.getTime())) {
+      toast.info(`La hora de entrada ha sido actualizada a las: ${localDatetime}.`);
+      setEventData({
+        ...eventData,
+        date_in: localDatetime,
+      });
+    } else if (newDate > dateIn) {
+      toast.info(`La hora de salida ha sido actualizada a las: ${localDatetime}.`);
+      setEventData({
+        ...eventData,
+        date_out: localDatetime,
+      });
+    } else {
+      toast.info(`La hora de entrada ha sido actualizada a las: ${localDatetime}.`);
+      setEventData({
+        ...eventData,
+        date_in: localDatetime,
+      });
+    }
+  };  
+
+  if (loading) {
+    return (
       <div className="pantalla">
         <div className="client-loader">
-            <MoonLoader color="#00B47E" size={50} speedMultiplier={0.8} />
-          </div>
-      </div>  
-    )
+          <MoonLoader color="#00B47E" size={50} speedMultiplier={0.8} />
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="h-100 d-flex flex-column flex-md-row">
       <div className="d-flex col-12 col-md-3 p-3 p-md-0">
-        <Agregar props={props}/>
+        <Agregar
+          props={props}
+          eventData={eventData}
+          setEventData={setEventData}
+        />
       </div>
-      <div className="col-12 col-md-9 mx-auto overflow-auto" style={{height: "80vh"}}>
+      <div
+        className="col-12 col-md-9 mx-auto overflow-auto"
+        style={{ height: "80vh" }}
+      >
         <Calendar
           defaultDate={moment().toDate()}
           defaultView="month"
           events={eventos}
           localizer={localizer}
+          onDoubleClickEvent={() => alert("Probando")}
           onEventDrop={MoverEventos}
           onEventResize={MoverEventos}
           onSelectEvent={handleEventClick}
+          onSelectSlot={(slotInfo) => setTime(slotInfo.start)}
           eventPropGetter={eventStyleGetter}
+          selectable
           resizable
         />
       </div>
@@ -119,3 +169,4 @@ function CalendarComponent({ props, reserves, loading }) {
 }
 
 export default CalendarComponent;
+

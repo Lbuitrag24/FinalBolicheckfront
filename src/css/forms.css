@@ -205,6 +205,18 @@
   transition: 0.2s;
 }
 
+.disabled2{
+  color: gray !important;
+  border: 2px gray solid !important;
+  box-shadow: 5px 5px 1px 0px gray !important;
+}
+
+.disabled2:hover{
+  border: 2px gray solid;
+  box-shadow: 0px 0px 0px 0px gray;
+  transition: 0.2s;
+}
+
 .secondary-btn-style{
   background-color: transparent;
   border: 2px #0097dd solid;
